@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Panel Interno de Gestión — Joyería Calvo">
+<title>Panel Interno · Joyería Calvo</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SYNC BAR -->
+<div class="sync-bar" id="syncBar"></div>
+
+<!-- ══════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">C<span>·</span>ALVO</div>
+    <div class="login-sub">Panel Interno · Acceso Restringido</div>
+    <div class="login-error" id="loginError">Usuario o contraseña incorrectos.</div>
+    <div class="login-info" id="loginInfo"></div>
+
+    <div id="loginForm">
+      <label class="login-label">Usuario</label>
+      <input class="login-input" id="loginUser" type="text" placeholder="Usuario"
+             autocomplete="off" autocapitalize="characters">
+      <label class="login-label">Contraseña</label>
+      <input class="login-input" id="loginPass" type="password" placeholder="••••••••">
+      <button class="login-btn" onclick="doLogin()">Acceder al Panel →</button>
+      <div class="login-forgot">
+        <button onclick="showForgot()">¿Olvidaste tu contraseña?</button>
+      </div>
+    </div>
+
+    <div id="forgotForm" class="hidden">
+      <div class="login-info" style="display:block;margin-bottom:1rem">
+        Para recuperar tu acceso envía una solicitud a los administradores.
+        Recibirás una nueva contraseña válida por 24 horas.
+      </div>
+      <button class="login-btn" style="background:var(--blue)" onclick="sendForgot()">
+        📧 Enviar solicitud de contraseña
+      </button>
+      <div class="login-forgot" style="margin-top:0.8rem">
+        <button onclick="showLoginForm()">← Volver al acceso</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════ -->
+<div id="app">
+  <div class="top-strip">
+    ENVÍO NACIONAL GRATUITO · ENTREGA EN 24/48 H ·
+    DISTRIBUIDOR OFICIAL: CARTIER · OMEGA · CHAUMET · MESSIKA · IWC · JAEGER-LECOULTRE · DESDE 1962
+  </div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <div class="header-logo">C<span>·</span>ALVO</div>
+      <div class="header-logo-sub">Alta Joyería · Panel Interno</div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge" id="liveBadge">
+        <div class="live-dot"></div>
+        <span id="liveLabel">EN VIVO</span>
+      </div>
+      <div class="user-badge">
+        <div class="user-dot"></div>
+        <span id="userLabel">—</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <nav class="tabs-nav">
+    <button class="tab-btn active" data-tab="accesos" onclick="switchTab('accesos')">
+      🔗 Accesos Rápidos
+    </button>
+    <button class="tab-btn" data-tab="calendario" onclick="switchTab('calendario')">
+      📅 Calendario
+    </button>
+    <button class="tab-btn" data-tab="tareas" onclick="switchTab('tareas')">
+      ✅ Tareas
+      <span id="todoBadge" class="tab-count hidden"></span>
+    </button>
+  </nav>
+
+  <!-- TAB: ACCESOS RÁPIDOS -->
+  <div class="tab-panel active" id="tab-accesos">
+    <div class="controls-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" type="text"
+               placeholder="Buscar acceso…" oninput="renderLinks()">
+      </div>
+      <select class="filter-select" id="filterCat" onchange="renderLinks()">
+        <option value="">Todas las categorías</option>
+      </select>
+      <button class="btn-action" onclick="openLinkModal()">＋ Añadir acceso</button>
+      <button class="btn-action sec" onclick="openCatModal()">＋ Categoría</button>
+    </div>
+    <div id="linksContainer"></div>
+  </div>
+
+  <!-- TAB: CALENDARIO -->
+  <div class="tab-panel" id="tab-calendario">
+    <div class="calendar-wrap">
+      <div class="cal-box">
+        <div class="cal-hd">
+          <button class="cal-nav" onclick="calNav(-1)">‹</button>
+          <div class="cal-title" id="calTitle"></div>
+          <button class="cal-nav" onclick="calNav(1)">›</button>
+        </div>
+        <div class="cal-wds">
+          <div class="cal-wd">Lu</div><div class="cal-wd">Ma</div>
+          <div class="cal-wd">Mi</div><div class="cal-wd">Ju</div>
+          <div class="cal-wd">Vi</div><div class="cal-wd">Sá</div>
+          <div class="cal-wd">Do</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div class="notes-panel">
+        <div class="notes-hd">
+          <div class="notes-date">
+            <small>Notas para el día</small>
+            <span id="selDateLabel">Selecciona un día</span>
+          </div>
+        </div>
+        <div class="notes-body">
+          <textarea class="notes-ta" id="noteInput"
+                    placeholder="Escribe una nota para este día…"></textarea>
+          <button class="notes-save" onclick="saveNote()">Guardar nota →</button>
+          <div id="notesList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: TAREAS -->
+  <div class="tab-panel" id="tab-tareas">
+    <div class="todo-wrap">
+      <div class="todo-hd-box">
+        <div>
+          <div class="todo-title">Lista de Tareas</div>
+          <div class="todo-stats" id="todoStats">0 pendientes · 0 completadas</div>
+        </div>
+        <button class="btn-action btn-ghost" onclick="clearDone()">
+          🗑 Limpiar completadas
+        </button>
+      </div>
+      <div class="todo-add-row">
+        <input class="todo-input" id="todoInput" type="text"
+               placeholder="Nueva tarea…" onkeydown="if(event.key==='Enter')addTodo()">
+        <select class="todo-pri" id="todoPri">
+          <option value="medium">⚡ Media</option>
+          <option value="high">🔴 Alta</option>
+          <option value="low">🟢 Baja</option>
+        </select>
+        <button class="btn-action" onclick="addTodo()">Añadir</button>
+      </div>
+      <div class="todo-filters">
+        <button class="todo-fb active" onclick="setFilter('all',this)">Todas</button>
+        <button class="todo-fb" onclick="setFilter('pending',this)">Pendientes</button>
+        <button class="todo-fb" onclick="setFilter('done',this)">Completadas</button>
+        <button class="todo-fb" onclick="setFilter('high',this)">🔴 Alta prioridad</button>
+      </div>
+      <div class="todo-list" id="todoList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- Link Modal -->
+<div class="modal-ov" id="linkModal" onclick="if(event.target===this)closeLinkModal()">
+  <div class="modal-box">
+    <div class="modal-inner">
+      <div class="modal-hd">
+        <div>
+          <div class="modal-tag" id="lmTag">Nuevo acceso</div>
+          <div class="modal-title" id="lmTitle">Añadir enlace</div>
+        </div>
+        <button class="modal-x" onclick="closeLinkModal()">✕</button>
+      </div>
+      <div class="fg">
+        <label class="fl">Nombre</label>
+        <input class="fi" id="lmName" type="text" placeholder="ej. Panel NetSuite…">
+      </div>
+      <div class="fg">
+        <label class="fl">URL</label>
+        <input class="fi" id="lmUrl" type="url" placeholder="https://…">
+      </div>
+      <div class="fg">
+        <label class="fl">Categoría</label>
+        <select class="fs" id="lmCat"></select>
+      </div>
+      <div class="fg">
+        <label class="fl" style="margin-bottom:0.5rem">Ícono</label>
+        <div class="icon-grid" id="iconGrid"></div>
+      </div>
+      <div class="modal-acts">
+        <button class="btn-cancel" onclick="closeLinkModal()">Cancelar</button>
+        <button class="btn-confirm" id="lmSaveBtn" onclick="saveLinkModal()">Guardar acceso</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-ov" id="catModal" onclick="if(event.target===this)closeCatModal()">
+  <div class="modal-box">
+    <div class="modal-inner">
+      <div class="modal-hd">
+        <div>
+          <div class="modal-tag">Organización</div>
+          <div class="modal-title" id="cmTitle">Nueva categoría</div>
+        </div>
+        <button class="modal-x" onclick="closeCatModal()">✕</button>
+      </div>
+      <div class="fg">
+        <label class="fl">Nombre de la categoría</label>
+        <input class="fi" id="cmName" type="text" placeholder="ej. Herramientas de Marketing">
+      </div>
+      <div class="fg">
+        <label class="fl">Descripción (opcional)</label>
+        <input class="fi" id="cmDesc" type="text" placeholder="Breve descripción…">
+      </div>
+      <div class="modal-acts">
+        <button class="btn-cancel" onclick="closeCatModal()">Cancelar</button>
+        <button class="btn-confirm" onclick="saveCatModal()">Guardar categoría</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-ov" id="delModal" onclick="if(event.target===this)closeDelModal()">
+  <div class="modal-box modal-sm">
+    <div class="modal-inner">
+      <div class="modal-hd">
+        <div>
+          <div class="modal-tag">Confirmar acción</div>
+          <div class="modal-title">Eliminar acceso</div>
+        </div>
+        <button class="modal-x" onclick="closeDelModal()">✕</button>
+      </div>
+      <p class="modal-body-text">
+        ¿Eliminar <strong id="delName"></strong>? Esta acción no puede deshacerse.
+      </p>
+      <div class="modal-acts">
+        <button class="btn-cancel" onclick="closeDelModal()">Cancelar</button>
+        <button class="btn-confirm danger" onclick="confirmDel()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Move Modal -->
+<div class="modal-ov" id="moveModal" onclick="if(event.target===this)closeMoveModal()">
+  <div class="modal-box modal-sm">
+    <div class="modal-inner">
+      <div class="modal-hd">
+        <div>
+          <div class="modal-tag">Mover acceso</div>
+          <div class="modal-title">Cambiar categoría</div>
+        </div>
+        <button class="modal-x" onclick="closeMoveModal()">✕</button>
+      </div>
+      <div class="fg">
+        <label class="fl">Mover <strong id="moveItemName"></strong> a</label>
+        <select class="fs" id="moveCatSel"></select>
+      </div>
+      <div class="modal-acts">
+        <button class="btn-cancel" onclick="closeMoveModal()">Cancelar</button>
+        <button class="btn-confirm" onclick="confirmMove()">Mover</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════
+     FIREBASE SDK  (Realtime Database)
+     ⚠️  Replace with your own config in config.js
+══════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
